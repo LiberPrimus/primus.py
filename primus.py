@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 from cicada.cicada import LiberPrimus
 from cicada.cicada.gematria import Latin, Runes, Cipher
 import helper
 import argparse
+
 
 class bcolors:
     HEADER = '\033[95m'
@@ -16,6 +18,7 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 LP = LiberPrimus()
 TARGET = 'pages'
@@ -29,7 +32,9 @@ SUM = False
 SUM_WORDS = False
 SUM_SENTENCES = False
 SUM_LINES = False
+WORDS_ONLY = False
 CIPHER_CHAIN = []
+msg = ''
 
 
 def throw_shit(text):
@@ -93,14 +98,40 @@ def throw_shit(text):
             method += ' → ' if len(method) > 0 else ''
             method += 'Gematria Sum of Text'
 
-
     if LANG == 'latin':
         text = Runes(str(text)).to_latin()
 
     if len(method) == 0:
         method = 'Direct Translation'
-    print(f'{bcolors.OKGREEN}[Decryption method: {method}]{bcolors.ENDC}\n')
-    print(text)
+
+    print(f'{bcolors.OKGREEN}[Decryption method: {method}]{bcolors.ENDC}')
+
+    if not WORDS_ONLY:
+        print(str(text))
+
+    matches = []
+    oneline = str(text).replace('\n', '')
+    oneline = oneline.replace('.', ' ')
+    for word in oneline.lower().split():
+        match = os.popen(f'grep -ow "\\b{word}\\b" english4.txt').read()
+        match = match.split('\n')
+        for m in match:
+            if m and m not in matches:
+                if len(m) > 3:
+                    matches.append(m)
+
+    if len(matches) > 0:
+        interesting = False
+        if len(matches) >= 10:
+            interesting = True
+
+        matches = ", ".join(matches)
+        print(f'\n{bcolors.OKBLUE}Possible English words found:\n[{matches}]{bcolors.ENDC}')
+        if interesting:
+            print(f'\n{bcolors.BOLD}{bcolors.HEADER}POSSIBLE SOLUTION ?!\n{bcolors.ENDC}')
+
+    else:
+        print(f'\n{bcolors.FAIL}No English words found :(\n{bcolors.ENDC}')
 
 
 # Handle command-line arguments
@@ -138,6 +169,8 @@ parser.add_argument('-sl', '--sumlines', action='store_true',
                     help='Calculate Gematria Sum of the lines in selected text')
 parser.add_argument('-sum', '--sum', action='store_true',
                     help='Calculate Gematria value of the individual characters in selected text')
+parser.add_argument('-w', '--wordsonly', action='store_true',
+                    help='Calculate Gematria value of the individual characters in selected text')
 
 args = parser.parse_args()
 
@@ -152,31 +185,32 @@ if args.ciphers:
     ciphers = str(args.ciphers[1:-1])
     ciphers = ciphers.split(',')
     CIPHER_CHAIN = ciphers
-else:
-    if args.atbash:
-        CIPHER_CHAIN.append('atbash')
-    if args.vigenere:
-        VIG = str(args.vigenere)
-        CIPHER_CHAIN.append(f'vigenere_{VIG}')
-    if args.totient:
-        CIPHER_CHAIN.append('totient')
-    if args.reverse:
-        CIPHER_CHAIN.append('reverse')
-    if args.shift:
-        CAESAR = int(args.shift)
-        CIPHER_CHAIN.append(f'shift:{CAESAR}')
-    if args.sumwords:
-        SUM_WORDS = True
-        CIPHER_CHAIN.append('sumwords')
-    if args.sumsentences:
-        SUM_SENTENCES = True
-        CIPHER_CHAIN.append('sumsentences')
-    if args.sumlines:
-        SUM_LINES = True
-        CIPHER_CHAIN.append('sumlines')
-    if args.sum:
-        SUM = True
-        CIPHER_CHAIN.append('sum')
+if args.atbash:
+    CIPHER_CHAIN.append('atbash')
+if args.vigenere:
+    VIG = str(args.vigenere)
+    CIPHER_CHAIN.append(f'vigenere_{VIG}')
+if args.totient:
+    CIPHER_CHAIN.append('totient')
+if args.reverse:
+    CIPHER_CHAIN.append('reverse')
+if args.shift:
+    CAESAR = int(args.shift)
+    CIPHER_CHAIN.append(f'shift:{CAESAR}')
+if args.sumwords:
+    SUM_WORDS = True
+    CIPHER_CHAIN.append('sumwords')
+if args.sumsentences:
+    SUM_SENTENCES = True
+    CIPHER_CHAIN.append('sumsentences')
+if args.sumlines:
+    SUM_LINES = True
+    CIPHER_CHAIN.append('sumlines')
+if args.sum:
+    SUM = True
+    CIPHER_CHAIN.append('sum')
+if args.wordsonly:
+    WORDS_ONLY = True
 
 if args.runes:
     LANG = 'runes'

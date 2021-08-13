@@ -86,11 +86,11 @@ It uses Taiiwo's great [Cicada Python Library](https://github.com/Taiiwo/cicada)
 ./primus -p u57 --sumlines
 # shorthand
 ./primus -p u57 -sl
-#Gematria sum of the sentences on page 57
+# Gematria sum of the sentences on page 57
 ./primus --page u57 --sumsentences
 # shorthand
 ./primus -p u57 -ss
-#Gematria sum of the whole page 57
+# Gematria sum of the whole page 57
 ./primus --page u57 --sum
 
 
