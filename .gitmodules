@@ -1,0 +1,3 @@
+[submodule "cicada"]
+	path = cicada
+	url = https://github.com/LiberPrimus/cicada.git
