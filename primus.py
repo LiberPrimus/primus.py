@@ -61,6 +61,12 @@ def throw_shit(text):
             method += ' → ' if len(method) > 0 else ''
             method += 'Totient Stream'
 
+        # Fibonacci Running Stream
+        elif cipher == 'fibonacci' or cipher == 'fib' or cipher == 'f':
+            text = Runes(str(text)).fib_stream()
+            method += ' → ' if len(method) > 0 else ''
+            method += 'Fibonacci Stream'
+
         # Reverse Text
         elif cipher == 'reverse' or cipher == 'R':
             text = str(text)[::-1]
@@ -122,7 +128,7 @@ def throw_shit(text):
 
     if len(matches) > 0:
         interesting = False
-        if len(matches) >= 10:
+        if len(matches) >= 7:
             interesting = True
 
         matches = ", ".join(matches)
@@ -152,6 +158,8 @@ parser.add_argument('-l', '--latin', action='store_true',
 parser.add_argument('-@', '--atbash', action='store_true',
                     help='Atbash the selected text')
 parser.add_argument('-t', '--totient', action='store_true',
+                    help='Use totient running stream on the selected text')
+parser.add_argument('-f', '--fibonacci', action='store_true',
                     help='Use totient running stream on the selected text')
 parser.add_argument('-R', '--reverse', action='store_true',
                     help='Reverse the order of the selected text')
@@ -192,6 +200,8 @@ if args.vigenere:
     CIPHER_CHAIN.append(f'vigenere_{VIG}')
 if args.totient:
     CIPHER_CHAIN.append('totient')
+if args.fibonacci:
+    CIPHER_CHAIN.append('fibonacci')
 if args.reverse:
     CIPHER_CHAIN.append('reverse')
 if args.shift:

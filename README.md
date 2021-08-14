@@ -94,6 +94,12 @@ It uses Taiiwo's great [Cicada Python Library](https://github.com/Taiiwo/cicada)
 ./primus --page u57 --sum
 
 
+# Print only the possible english words found
+./primus --page uall --wordsonly
+# shorthand
+./primus -p uall -w
+
+
 # Saving results
 ./primus -p all -c [@,t,R] > results.txt
 ```
