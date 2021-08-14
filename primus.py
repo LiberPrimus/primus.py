@@ -158,9 +158,9 @@ parser.add_argument('-l', '--latin', action='store_true',
 parser.add_argument('-@', '--atbash', action='store_true',
                     help='Atbash the selected text')
 parser.add_argument('-t', '--totient', action='store_true',
-                    help='Use totient running stream on the selected text')
+                    help='Use totient running stream on selected text')
 parser.add_argument('-f', '--fibonacci', action='store_true',
-                    help='Use totient running stream on the selected text')
+                    help='Use fibonacci stream (sum of the 2 previous runes % 29) on selected text')
 parser.add_argument('-R', '--reverse', action='store_true',
                     help='Reverse the order of the selected text')
 parser.add_argument('-v', '--vigenere', action='store', nargs='?', type=str,
