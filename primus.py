@@ -194,7 +194,7 @@ parser.add_argument('-S', '--shift', action='store', nargs='?', type=int,
                     help='Apply a Caesar cipher with a shift of N')
 parser.add_argument('-c', '--ciphers', action='store', type=str, nargs='?',
                     help='Chain of ciphers to use in order, comma-separated. Eg: [atbash,shift:7,totient,vigenere:divinity,reverse] or [@,S7,t,v:divinity,R]')
-parser.add_argument('-cw', '--closewords', action='store', nargs='?', type=int,
+parser.add_argument('-mr', '--matchratio', action='store', nargs='?', type=int,
                     help='Also look for English words that match X percents of the deciphered words')
 parser.add_argument('-sw', '--sumwords', action='store_true',
                     help='Calculate Gematria Sum of the words in selected text')
@@ -234,8 +234,8 @@ if args.reverse:
 if args.shift:
     CAESAR = int(args.shift)
     CIPHER_CHAIN.append(f'shift:{CAESAR}')
-if args.closewords:
-    MATCH_RATIO = (int(args.closewords) - 1) / 100
+if args.matchratio:
+    MATCH_RATIO = (int(args.matchratio) - 1) / 100
     CLOSE_WORDS = True
 if args.sumwords:
     SUM_WORDS = True
