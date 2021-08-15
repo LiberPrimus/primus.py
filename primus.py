@@ -4,7 +4,8 @@
 import os
 from cicada.cicada import LiberPrimus
 from cicada.cicada.gematria import Latin, Runes, Cipher
-import helper
+from Levenshtein import *
+from StringMatcher import StringMatcher
 import argparse
 
 
@@ -34,7 +35,11 @@ SUM_SENTENCES = False
 SUM_LINES = False
 WORDS_ONLY = False
 CIPHER_CHAIN = []
+CLOSE_WORDS = False
+MATCH_RATIO = 0.84
+
 msg = ''
+string_matcher = StringMatcher()
 
 
 def throw_shit(text):
@@ -116,8 +121,13 @@ def throw_shit(text):
         print(str(text))
 
     matches = []
+    possible_matches = []
     oneline = str(text).replace('\n', '')
     oneline = oneline.replace('.', ' ')
+
+    with open('english4.txt') as f:
+        english_dict = f.readlines()
+
     for word in oneline.lower().split():
         match = os.popen(f'grep -ow "\\b{word}\\b" english4.txt').read()
         match = match.split('\n')
@@ -126,13 +136,28 @@ def throw_shit(text):
                 if len(m) > 3:
                     matches.append(m)
 
+    if CLOSE_WORDS:
+        for word in english_dict:
+            word = word.replace('\n', '')
+            for cword in oneline.lower().split():
+                # only search for matches in words that are +/- 1 letters in length
+                if 4 <= len(cword) == len(word) or 4 <= len(cword) == len(word) - 1 or 4 <= len(cword) == len(word) + 1:
+                    string_matcher.set_seqs(word, cword)
+                    dist = string_matcher.quick_ratio()
+                    if MATCH_RATIO < dist < 1.0:
+                        if word not in possible_matches and cword not in matches:
+                            possible_matches.append(f'{word} ({round(dist * 100, 1)}%)')
+
     if len(matches) > 0:
         interesting = False
         if len(matches) >= 7:
             interesting = True
 
         matches = ", ".join(matches)
-        print(f'\n{bcolors.OKBLUE}Possible English words found:\n[{matches}]{bcolors.ENDC}')
+        print(f'\n{bcolors.OKCYAN}English words found:\n[{matches}]{bcolors.ENDC}')
+        if CLOSE_WORDS:
+            possible_matches = ", ".join(possible_matches).replace(',', ',\n')
+            print(f'\n{bcolors.OKBLUE}Other possible words found:\n[{possible_matches}]{bcolors.ENDC}')
         if interesting:
             print(f'\n{bcolors.BOLD}{bcolors.HEADER}POSSIBLE SOLUTION ?!\n{bcolors.ENDC}')
 
@@ -169,6 +194,8 @@ parser.add_argument('-S', '--shift', action='store', nargs='?', type=int,
                     help='Apply a Caesar cipher with a shift of N')
 parser.add_argument('-c', '--ciphers', action='store', type=str, nargs='?',
                     help='Chain of ciphers to use in order, comma-separated. Eg: [atbash,shift:7,totient,vigenere:divinity,reverse] or [@,S7,t,v:divinity,R]')
+parser.add_argument('-cw', '--closewords', action='store', nargs='?', type=int,
+                    help='Also look for English words that match X percents of the deciphered words')
 parser.add_argument('-sw', '--sumwords', action='store_true',
                     help='Calculate Gematria Sum of the words in selected text')
 parser.add_argument('-ss', '--sumsentences', action='store_true',
@@ -207,6 +234,9 @@ if args.reverse:
 if args.shift:
     CAESAR = int(args.shift)
     CIPHER_CHAIN.append(f'shift:{CAESAR}')
+if args.closewords:
+    MATCH_RATIO = (int(args.closewords) - 1) / 100
+    CLOSE_WORDS = True
 if args.sumwords:
     SUM_WORDS = True
     CIPHER_CHAIN.append('sumwords')

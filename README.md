@@ -5,6 +5,9 @@ A python script to help attempt to decrypt the Liber Primus.
 This tool allows you to chain different ciphers in a given order on any page/segment/paragraph of the Liber Primus.
 You can also do Gematria sums of the words, lines, sentences or full page/segment/paragraph.
 
+Results are checked against an English dictionary so you can scan through the results much more quickly and reliably.
+Optionally you can check for words that are close matches (eg: DIUINITY -> DIVINITY) using the `--closewords` argument
+
 It uses Taiiwo's great [Cicada Python Library](https://github.com/Taiiwo/cicada)
 
 
@@ -13,6 +16,8 @@ It uses Taiiwo's great [Cicada Python Library](https://github.com/Taiiwo/cicada)
 git clone https://github.com/LiberPrimus/primus.py.git primus
 cd primus
 git submodule update --init
+# For matching close words (--closewords)
+pip3 install python-Levenshtein
 
 # Optionally, add primus.py to your path so you can use it anywhere
 echo PATH=$PATH:$(pwd) >> ~/.bashrc && . ~/.bashrc
