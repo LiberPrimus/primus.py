@@ -44,7 +44,8 @@ string_matcher = StringMatcher()
 
 def throw_shit(text):
     method = ''
-
+    pagelen = len(str(text).replace('\n', '').replace('.', '').replace(' ', ''))
+    print(f'PAGE LENGTH: {pagelen} characters')
     for cipher in CIPHER_CHAIN:
         # Atbash
         if cipher == 'atbash' or cipher == '@':
@@ -72,6 +73,11 @@ def throw_shit(text):
             method += ' → ' if len(method) > 0 else ''
             method += 'Fibonacci Stream'
 
+        elif cipher == 'mod60':
+            text = Runes(str(text)).mod60()
+            method += ' → ' if len(method) > 0 else ''
+            method += 'i+3301 % 60 % 29'
+
         # Reverse Text
         elif cipher == 'reverse' or cipher == 'R':
             text = str(text)[::-1]
@@ -88,6 +94,17 @@ def throw_shit(text):
             text = Runes(str(text)).shift(shift_by)
             method += ' → ' if len(method) > 0 else ''
             method += f'Caesar Shift by {shift_by}'
+
+        # Custom function
+        elif 'custom:' in cipher:
+            code = cipher.split(':')[1]
+
+            def custom_func(i, primes, pos):
+                return eval(code)
+
+            text = Runes(str(text)).arbitrary(custom_func)
+            method += ' → ' if len(method) > 0 else ''
+            method += f'Custom Function ({code})'
 
         elif cipher == 'sw' or cipher == 'sumwords':
             text = Runes(str(text)).gematria_sum_words()
@@ -192,6 +209,10 @@ parser.add_argument('-v', '--vigenere', action='store', nargs='?', type=str,
                     help='Use totient running stream on the selected text')
 parser.add_argument('-S', '--shift', action='store', nargs='?', type=int,
                     help='Apply a Caesar cipher with a shift of N')
+parser.add_argument('-mod60', '--mod60', action='store_true',
+                    help='Mod 60 -> Mod 29')
+parser.add_argument('-custom', '--custom', action='store', nargs='?', type=str,
+                    help='Run custom function on the rune indexes')
 parser.add_argument('-c', '--ciphers', action='store', type=str, nargs='?',
                     help='Chain of ciphers to use in order, comma-separated. Eg: [atbash,shift:7,totient,vigenere:divinity,reverse] or [@,S7,t,v:divinity,R]')
 parser.add_argument('-mr', '--matchratio', action='store', nargs='?', type=int,
@@ -234,6 +255,10 @@ if args.reverse:
 if args.shift:
     CAESAR = int(args.shift)
     CIPHER_CHAIN.append(f'shift:{CAESAR}')
+if args.mod60:
+    CIPHER_CHAIN.append('mod60')
+if args.custom:
+    CIPHER_CHAIN.append(f'custom:{str(args.custom)}')
 if args.matchratio:
     MATCH_RATIO = (int(args.matchratio) - 1) / 100
     CLOSE_WORDS = True
