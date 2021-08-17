@@ -45,7 +45,8 @@ string_matcher = StringMatcher()
 def throw_shit(text):
     method = ''
     pagelen = len(str(text).replace('\n', '').replace('.', '').replace(' ', ''))
-    print(f'PAGE LENGTH: {pagelen} characters')
+    pagelines = len(str(text).split('\n'))
+    # print(f'PAGE LENGTH: {pagelen} runes / {pagelines} lines')
     for cipher in CIPHER_CHAIN:
         # Atbash
         if cipher == 'atbash' or cipher == '@':
@@ -56,10 +57,11 @@ def throw_shit(text):
         # Vigenere
         if cipher[0:8] == 'vigenere' or cipher == 'v' or 'v:' in cipher:
             key = cipher.split(':')[1] if ':' in cipher else VIG
+            ogkey = key
             key = Latin(key).to_runes() if key.isalpha() else key
             text = Runes(str(text)).vigenere(str(key), [], True)
             method += ' → ' if len(method) > 0 else ''
-            method += f'Vigenere with key "{key}"'
+            method += f'Vigenere with key "{ogkey}"'
 
         # Totient Running Stream
         elif cipher == 'totient' or cipher == 't':
@@ -72,6 +74,10 @@ def throw_shit(text):
             text = Runes(str(text)).fib_stream()
             method += ' → ' if len(method) > 0 else ''
             method += 'Fibonacci Stream'
+        elif cipher == 'fibprimes':
+            text = Runes(str(text)).fib_stream(True)
+            method += ' → ' if len(method) > 0 else ''
+            method += 'Fibonacci Prime Stream'
 
         elif cipher == 'mod60':
             text = Runes(str(text)).mod60()
@@ -167,6 +173,7 @@ def throw_shit(text):
 
     if len(matches) > 0:
         interesting = False
+        interest_num = 7 if TARGET == 'pages' else 12
         if len(matches) >= 7:
             interesting = True
 
@@ -174,7 +181,8 @@ def throw_shit(text):
         print(f'\n{bcolors.OKCYAN}English words found:\n[{matches}]{bcolors.ENDC}')
         if CLOSE_WORDS:
             possible_matches = ", ".join(possible_matches).replace(',', ',\n')
-            print(f'\n{bcolors.OKBLUE}Other possible words found:\n[{possible_matches}]{bcolors.ENDC}')
+            if len(possible_matches) > 0:
+                print(f'\n{bcolors.OKBLUE}Other possible words found:\n[{possible_matches}]{bcolors.ENDC}')
         if interesting:
             print(f'\n{bcolors.BOLD}{bcolors.HEADER}POSSIBLE SOLUTION ?!\n{bcolors.ENDC}')
 
@@ -203,6 +211,8 @@ parser.add_argument('-t', '--totient', action='store_true',
                     help='Use totient running stream on selected text')
 parser.add_argument('-f', '--fibonacci', action='store_true',
                     help='Use fibonacci stream (sum of the 2 previous runes % 29) on selected text')
+parser.add_argument('-fb', '--fibonacciprimes', action='store_true',
+                    help='Use fibonacci prime stream (sum of the 2 previous runes prime values % 29) on selected text')
 parser.add_argument('-R', '--reverse', action='store_true',
                     help='Reverse the order of the selected text')
 parser.add_argument('-v', '--vigenere', action='store', nargs='?', type=str,
@@ -250,6 +260,8 @@ if args.totient:
     CIPHER_CHAIN.append('totient')
 if args.fibonacci:
     CIPHER_CHAIN.append('fibonacci')
+if args.fibonacciprimes:
+    CIPHER_CHAIN.append('fibprimes')
 if args.reverse:
     CIPHER_CHAIN.append('reverse')
 if args.shift:
@@ -288,13 +300,15 @@ if args.X == 'all':
         throw_shit(targ)
 
 elif args.X[0] == 'u':
+    start = 15 if TARGET == 'pages' else 5
+
     if args.X[1:] == 'all':
-        for i, targ in enumerate(getattr(LP, TARGET)[15:]):
+        for i, targ in enumerate(getattr(LP, TARGET)[start:]):
             print(f'{bcolors.BOLD}{bcolors.WARNING}\n\n======= {TARGET[:-1].upper()} {i} ======={bcolors.ENDC}')
             throw_shit(targ)
     else:
         print(f'{bcolors.BOLD}{bcolors.WARNING}\n\n======= {TARGET[:-1].upper()} {args.X[1:]} ======={bcolors.ENDC}')
-        throw_shit(getattr(LP, TARGET)[int(args.X[1:]) + 15])
+        throw_shit(getattr(LP, TARGET)[int(args.X[1:]) + start])
 else:
     print(f'{bcolors.BOLD}{bcolors.WARNING}\n\n======= {TARGET[:-1].upper()} {args.X} ======={bcolors.ENDC}')
     throw_shit(getattr(LP, TARGET)[int(args.X)])
